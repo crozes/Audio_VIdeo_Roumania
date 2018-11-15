@@ -89,7 +89,7 @@ def convertMatrixesToY() :
     for x in range (0,sizeH) :
         tmp = []
         for y in range (0,sizeW) :
-            tmp.append(0.299 * MatrixesR[x][y] + 0.587 * MatrixesG[x][y] + 0.114 * MatrixesB[x][y])
+            tmp.append((0.257 * MatrixesR[x][y]) + (0.504 * MatrixesG[x][y]) + (0.098 * MatrixesB[x][y]) + 16)
         MatrixesY.append(tmp)    
     return 
 
@@ -97,7 +97,8 @@ def convertMatrixesToU() :
     for x in range (0,sizeH) :
         tmp = []
         for y in range (0,sizeW) :
-            tmp.append(128 - 0.1687*MatrixesR[x][y] - 0.3312*MatrixesG[x][y] + 0.5*MatrixesB[x][y])
+            #tmp.append(128 - 0.1687*MatrixesR[x][y] - 0.3312*MatrixesG[x][y] + 0.5*MatrixesB[x][y])
+            tmp.append((-(0.148 * MatrixesR[x][y])) - (0.291 * MatrixesG[x][y]) + (0.439 * MatrixesB[x][y]) + 128.0)
         MatrixesU.append(tmp)    
     return
 
@@ -105,7 +106,8 @@ def convertMatrixesToV() :
     for x in range (0,sizeH) :
         tmp = []
         for y in range (0,sizeW) :
-            tmp.append(128 + 0.5*MatrixesR[x][y] - 0.4186*MatrixesG[x][y] + 0.0813*MatrixesB[x][y])
+            #tmp.append(128 + 0.5*MatrixesR[x][y] - 0.4186*MatrixesG[x][y] + 0.0813*MatrixesB[x][y])
+            tmp.append((0.439*MatrixesR[x][y]) - (0.368*MatrixesG[x][y]) - (0.071*MatrixesB[x][y]) + 128)
         MatrixesV.append(tmp)    
     return
 
@@ -138,7 +140,7 @@ def decompressMatrixes(matrixes) :
         for line in range (0,8) : 
             for matrix in range(cpt+0,cpt+100) :
                 for value in range(0,8) :
-                    matrixesDecompressed.append(matrixesYDivided[matrix][line][value])
+                    matrixesDecompressed.append(matrixes[matrix][line][value])
         cpt = cpt + 100
     return matrixesDecompressed       
 
@@ -213,13 +215,22 @@ def writeNewImg(img,header,sizeW,sizeH,maxValueOfAByte) :
     img.write(header)
     img.write(str(sizeW)+" "+str(sizeH)+"\n")
     img.write(str(maxValueOfAByte)+"\n")
-    for x in range(0,480000) :
-        R = matrixesYDecompressed[x] + 1.403 * matrixesVDecompressed[x]
-        G = matrixesYDecompressed[x] - 0.344 * matrixesUDecompressed[x] - 0.714 * matrixesVDecompressed[x]
-        B = matrixesYDecompressed[x] + 1.770 * matrixesUDecompressed[x]
-        img.write(str(R)+"\n")
-        img.write(str(G)+"\n")
-        img.write(str(B)+"\n")           
+    for x in range(0,sizeH*sizeW) :
+        #R = matrixesYDecompressed[x] + 1.403 * matrixesVDecompressed[x]
+        newR = int(1.164*(matrixesYDecompressed[x] - 16) + 1.596 * (matrixesVDecompressed[x] - 128))
+        #G = matrixesYDecompressed[x] - 0.344 * matrixesUDecompressed[x] - 0.714 * matrixesVDecompressed[x]
+        newG = int(1.164*(matrixesYDecompressed[x] - 16) - 0.813*(matrixesVDecompressed[x] - 128) - 0.391 * (matrixesUDecompressed[x] - 128))
+        #B = matrixesYDecompressed[x] + 1.770 * matrixesUDecompressed[x]
+        newB = int(1.164*(matrixesYDecompressed[x] - 16) + 2.018 * (matrixesUDecompressed[x] - 128))
+        if(newR > 255) :
+            newR = 255
+        if(newG > 255) :
+            newG = 255
+        if(newB > 255) :
+            newB = 255        
+        img.write(str(newR)+"\n")
+        img.write(str(newG)+"\n")
+        img.write(str(newB)+"\n")           
     return 
 
 #---------- Main ----------
@@ -280,7 +291,13 @@ matrixesYDecompressed = decompressMatrixes(matrixesYDivided)
 matrixesUDecompressed = decompressMatrixes(matrixesUDivided)
 matrixesVDecompressed = decompressMatrixes(matrixesVDivided)
 
-print(str(matrixesYDecompressed[0]))
+
+filetest = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/testY","wb")
+filetest.write(str(matrixesYDecompressed))
+filetestt = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/testU","wb")
+filetestt.write(str(matrixesUDecompressed))
+filetesttt = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/testV","wb")
+filetesttt.write(str(matrixesVDecompressed))
 
 print("Ready to Create new Image")
 # Create new image
@@ -288,12 +305,6 @@ newImage = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie
 writeNewImg(newImage,header,sizeW,sizeH,maxValueOfAByte)
 
 
-
-
-
-
-
-        
 
 #---------- Code Test ----------
 
