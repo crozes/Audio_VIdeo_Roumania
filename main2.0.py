@@ -18,6 +18,10 @@ MatrixesV = []
 matrixesYDivided = []
 matrixesUDivided = []
 matrixesVDivided = []
+
+matrixesYDecompressed = []
+matrixesUDecompressed = []
+matrixesVDecompressed = []
 #---------- Function ----------
 def getHeaderFile(fileOpened) :
     cpt = 0
@@ -124,7 +128,20 @@ def compressMatrixe(matrixesDivided) :
                 for i in range (a,a+2) :
                     for y in range (b,b+2) :
                         matrixes[i][y] = valTmp
-    return 
+    return
+
+
+def decompressMatrixes(matrixes) :
+    matrixesDecompressed = []
+    cpt = 0
+    for notUsed in range(0,75) :
+        for line in range (0,8) : 
+            for matrix in range(cpt+0,cpt+100) :
+                for value in range(0,8) :
+                    matrixesDecompressed.append(matrixesYDivided[matrix][line][value])
+        cpt = cpt + 100
+    return matrixesDecompressed       
+
 
 def DiscreteCosineTransform() :
     for matrix in  matrixesYDivided :
@@ -138,7 +155,7 @@ def DiscreteCosineTransform() :
     for matrix in  matrixesVDivided :
         for values in matrix :
             for value in values :
-                value = value - 128                         
+                value = value - 128                 
     return 
 
 #---------- Function Test ----------
@@ -185,15 +202,25 @@ def writeImg(img,header,sizeW,sizeH,maxValueOfAByte) :
     img.write(header)
     img.write(str(sizeW)+" "+str(sizeH)+"\n")
     img.write(str(maxValueOfAByte)+"\n")
-    print("Size of matrixes : "+str(len(MatrixesG[0])))
-    print("Size of matrixes : "+str(len(MatrixesG[1])))
-    print("Size of matrixes : "+str(len(MatrixesG[599])))
     for x in range(0,sizeH) :
         for y in range(0,sizeW) :
             img.write(str(MatrixesR[x][y])+"\n")
             img.write(str(MatrixesG[x][y])+"\n")
             img.write(str(MatrixesB[x][y])+"\n")          
-    return   
+    return 
+
+def writeNewImg(img,header,sizeW,sizeH,maxValueOfAByte) :
+    img.write(header)
+    img.write(str(sizeW)+" "+str(sizeH)+"\n")
+    img.write(str(maxValueOfAByte)+"\n")
+    for x in range(0,480000) :
+        R = matrixesYDecompressed[x] + 1.403 * matrixesVDecompressed[x]
+        G = matrixesYDecompressed[x] - 0.344 * matrixesUDecompressed[x] - 0.714 * matrixesVDecompressed[x]
+        B = matrixesYDecompressed[x] + 1.770 * matrixesUDecompressed[x]
+        img.write(str(R)+"\n")
+        img.write(str(G)+"\n")
+        img.write(str(B)+"\n")           
+    return 
 
 #---------- Main ----------
 fileBinary = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/nt-P3.ppm","rb")
@@ -216,9 +243,11 @@ print('Heigth Size : '+str(sizeH))
 maxValueOfAByte = getMaxValueOfAByte(fileBinary)
 print('maxValueOfAByte : '+str(maxValueOfAByte))
 
+print("Ready to get All pixels")
 # Fill all matrixes with the pixels
 getAllPixel(fileBinary)
 
+print("Ready to Convert matrixes")
 # Create Matrixe Y
 convertMatrixesToY()
 # Create Matrixe U
@@ -226,6 +255,7 @@ convertMatrixesToU()
 # Create Matrixe V
 convertMatrixesToV()
 
+print("Ready to Divided matrixes")
 # Get All Matrixes Divided
 for i in range(0,sizeH,8) :
     for j in range(0,sizeW,8) :
@@ -233,12 +263,37 @@ for i in range(0,sizeH,8) :
         matrixesUDivided.append(devideMatrixes(i,j,MatrixesU))
         matrixesVDivided.append(devideMatrixes(i,j,MatrixesV))
 
-# Matrixes are Compress
+print("Ready to compress Matrixes U and V")
+# Matrixes are Compress ( U - V )
 compressMatrixe(matrixesUDivided)
-compressMatrixe(matrixesVDivided)  
+compressMatrixe(matrixesVDivided)
 
-fileTest = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/test","wb")
-fileTest.write(str(matrixesUDivided))
+# fileTest = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/test","wb")
+# fileTest.write(str(matrixesYDivided))
+
+# fileTestt = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/testt","wb")
+# fileTestt.write(str(matrixesYDecompressed))
+
+print("Ready to Reformat matrixes")
+# Reformat Matrixes
+matrixesYDecompressed = decompressMatrixes(matrixesYDivided)
+matrixesUDecompressed = decompressMatrixes(matrixesUDivided)
+matrixesVDecompressed = decompressMatrixes(matrixesVDivided)
+
+print(str(matrixesYDecompressed[0]))
+
+print("Ready to Create new Image")
+# Create new image
+newImage = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/newimage.ppm","wb")
+writeNewImg(newImage,header,sizeW,sizeH,maxValueOfAByte)
+
+
+
+
+
+
+
+        
 
 #---------- Code Test ----------
 
