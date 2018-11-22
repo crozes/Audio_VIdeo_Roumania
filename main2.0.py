@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*
 
 #---------- Include ----------
-
+from math import *
 #---------- Variables Globals ----------
 sizeW = 0
 sizeH = 0
@@ -171,7 +171,20 @@ def DiscreteCosineTransform() :
         for values in matrix :
             for value in values :
                 value = value - 128                 
-    return 
+    return
+
+def ForwardDCT(matrix) :
+    for u in range(0,8) :
+        for v in range(0,8) :
+            for x in range(0,8) :
+                for y in range(0,8) :
+                    if u == 0 :
+                        U = 1 / sqrt(2)
+                    else :
+                        U = 1    
+                    tmp = tmp + cos(((2*x+1)*U*pi)/16)*cos(((2*x+1)*v*pi)/16)
+                    print(str(tmp))
+    return    
 
 #---------- Function Test ----------
 def writeImgB(imgB,header,sizeW,sizeH,maxValueOfAByte) :
@@ -287,17 +300,22 @@ print("Ready to compress Matrixes U and V")
 compressMatrixe(matrixesUDivided)
 compressMatrixe(matrixesVDivided)
 
-print("Ready to Reformat matrixes")
-# Reformat Matrixes
-matrixesYDecompressed = decompressMatrixes(matrixesYDivided)
-matrixesUDecompressed = decompressMatrixes(matrixesUDivided)
-matrixesVDecompressed = decompressMatrixes(matrixesVDivided)
+print("Ready to substract 128 to all values")
+DiscreteCosineTransform()
 
-print("Ready to Create new Image")
-# Create new image
-newImage = open("newimage.ppm","wb")
-#newImage = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/newimage.ppm","wb")
-writeNewImg(newImage,header,sizeW,sizeH,maxValueOfAByte)
+ForwardDCT(matrixesYDivided)
+
+# print("Ready to Reformat matrixes")
+# # Reformat Matrixes
+# matrixesYDecompressed = decompressMatrixes(matrixesYDivided)
+# matrixesUDecompressed = decompressMatrixes(matrixesUDivided)
+# matrixesVDecompressed = decompressMatrixes(matrixesVDivided)
+
+# print("Ready to Create new Image")
+# # Create new image
+# newImage = open("newimage.ppm","wb")
+# #newImage = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/newimage.ppm","wb")
+# writeNewImg(newImage,header,sizeW,sizeH,maxValueOfAByte)
 
 
 
