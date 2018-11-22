@@ -158,33 +158,39 @@ def decompressMatrixes(matrixes) :
     return matrixesDecompressed       
 
 
-def DiscreteCosineTransform() :
-    for matrix in  matrixesYDivided :
-        for values in matrix :
-            for value in values :
-                value = value - 128
-    for matrix in  matrixesUDivided :
-        for values in matrix :
-            for value in values :
-                value = value - 128
-    for matrix in  matrixesVDivided :
-        for values in matrix :
-            for value in values :
-                value = value - 128                 
+def DiscreteCosineTransform(matrixeY,matrixeU,matrixeV) :
+    for matrix in range(0,len(matrixeY)) :
+        for lines in range(0,len(matrixeY[matrix])) :
+            for value in range(0,len(matrixeY[matrix][lines])) :
+                matrixeY[matrix][lines][value] = matrixeY[matrix][lines][value] - 128
+    for matrix in range(0,len(matrixeU)) :
+        for lines in range(0,len(matrixeU[matrix])) :
+            for value in range(0,len(matrixeU[matrix][lines])) :
+                matrixeU[matrix][lines][value] = matrixeU[matrix][lines][value] - 128
+    for matrix in range(0,len(matrixeV)) :
+        for lines in range(0,len(matrixeV[matrix])) :
+            for value in range(0,len(matrixeV[matrix][lines])) :
+                matrixeV[matrix][lines][value] = matrixeV[matrix][lines][value] - 128         
     return
 
-def ForwardDCT(matrix) :
-    for u in range(0,8) :
-        for v in range(0,8) :
-            for x in range(0,8) :
+def ForwardDCT(matrixes) :
+    for v in range(0,8) :
+        for u in range(0,8) :
+            if u == 0 :
+                U = V = 1 / sqrt(2)
+            else :
+                U = V = 1    
+            coef = (U*V)/4
+            tmp = 0
+            #Ajout dans matrix UV
+            for matrix in range(0,len(matrixes)) :
                 for y in range(0,8) :
-                    if u == 0 :
-                        U = 1 / sqrt(2)
-                    else :
-                        U = 1    
-                    tmp = tmp + cos(((2*x+1)*U*pi)/16)*cos(((2*x+1)*v*pi)/16)
-                    print(str(tmp))
-    return    
+                    for x in range(0,8) :    
+                        tmp = tmp + cos(((2*x+1)*u*pi)/16)*cos(((2*x+1)*v*pi)/16)
+
+            # coef * tmp
+                    
+    return  
 
 #---------- Function Test ----------
 def writeImgB(imgB,header,sizeW,sizeH,maxValueOfAByte) :
@@ -300,10 +306,12 @@ print("Ready to compress Matrixes U and V")
 compressMatrixe(matrixesUDivided)
 compressMatrixe(matrixesVDivided)
 
-print("Ready to substract 128 to all values")
-DiscreteCosineTransform()
+# print("Ready to substract 128 to all values")
+DiscreteCosineTransform(matrixesYDivided,matrixesUDivided,matrixesVDivided)
 
 ForwardDCT(matrixesYDivided)
+
+
 
 # print("Ready to Reformat matrixes")
 # # Reformat Matrixes
