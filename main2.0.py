@@ -22,6 +22,7 @@ matrixesVDivided = []
 matrixesYDecompressed = []
 matrixesUDecompressed = []
 matrixesVDecompressed = []
+
 #---------- Function ----------
 def getHeaderFile(fileOpened) :
     cpt = 0
@@ -89,7 +90,12 @@ def convertMatrixesToY() :
     for x in range (0,sizeH) :
         tmp = []
         for y in range (0,sizeW) :
-            tmp.append((0.257 * MatrixesR[x][y]) + (0.504 * MatrixesG[x][y]) + (0.098 * MatrixesB[x][y]) + 16)
+            tmpValue = (0.257 * MatrixesR[x][y]) + (0.504 * MatrixesG[x][y]) + (0.098 * MatrixesB[x][y]) + 16.0
+            if(tmpValue > 255) :
+                tmpValue = 255
+            if(tmpValue < 0) :
+                tmpValue = 0
+            tmp.append(tmpValue)
         MatrixesY.append(tmp)    
     return 
 
@@ -97,8 +103,12 @@ def convertMatrixesToU() :
     for x in range (0,sizeH) :
         tmp = []
         for y in range (0,sizeW) :
-            #tmp.append(128 - 0.1687*MatrixesR[x][y] - 0.3312*MatrixesG[x][y] + 0.5*MatrixesB[x][y])
-            tmp.append((-(0.148 * MatrixesR[x][y])) - (0.291 * MatrixesG[x][y]) + (0.439 * MatrixesB[x][y]) + 128.0)
+            tmpValue = (-(0.148 * MatrixesR[x][y])) - (0.291 * MatrixesG[x][y]) + (0.439 * MatrixesB[x][y]) + 128.0
+            if(tmpValue > 255) :
+                tmpValue = 255
+            if(tmpValue < 0) :
+                tmpValue = 0
+            tmp.append(tmpValue)
         MatrixesU.append(tmp)    
     return
 
@@ -106,8 +116,12 @@ def convertMatrixesToV() :
     for x in range (0,sizeH) :
         tmp = []
         for y in range (0,sizeW) :
-            #tmp.append(128 + 0.5*MatrixesR[x][y] - 0.4186*MatrixesG[x][y] + 0.0813*MatrixesB[x][y])
-            tmp.append((0.439*MatrixesR[x][y]) - (0.368*MatrixesG[x][y]) - (0.071*MatrixesB[x][y]) + 128)
+            tmpValue = (0.439*MatrixesR[x][y]) - (0.368*MatrixesG[x][y]) - (0.071*MatrixesB[x][y]) + 128
+            if(tmpValue > 255) :
+                tmpValue = 255
+            if(tmpValue < 0) :
+                tmpValue = 0
+            tmp.append(tmpValue)
         MatrixesV.append(tmp)    
     return
 
@@ -131,7 +145,6 @@ def compressMatrixe(matrixesDivided) :
                     for y in range (b,b+2) :
                         matrixes[i][y] = valTmp
     return
-
 
 def decompressMatrixes(matrixes) :
     matrixesDecompressed = []
@@ -221,20 +234,15 @@ def writeNewImg(img,header,sizeW,sizeH,maxValueOfAByte) :
         #G = matrixesYDecompressed[x] - 0.344 * matrixesUDecompressed[x] - 0.714 * matrixesVDecompressed[x]
         newG = int(1.164*(matrixesYDecompressed[x] - 16) - 0.813*(matrixesVDecompressed[x] - 128) - 0.391 * (matrixesUDecompressed[x] - 128))
         #B = matrixesYDecompressed[x] + 1.770 * matrixesUDecompressed[x]
-        newB = int(1.164*(matrixesYDecompressed[x] - 16) + 2.018 * (matrixesUDecompressed[x] - 128))
-        if(newR > 255) :
-            newR = 255
-        if(newG > 255) :
-            newG = 255
-        if(newB > 255) :
-            newB = 255        
+        newB = int(1.164*(matrixesYDecompressed[x] - 16) + 2.018 * (matrixesUDecompressed[x] - 128))  
         img.write(str(newR)+"\n")
         img.write(str(newG)+"\n")
         img.write(str(newB)+"\n")           
     return 
 
 #---------- Main ----------
-fileBinary = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/nt-P3.ppm","rb")
+#fileBinary = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/nt-P3.ppm","rb")
+fileBinary = open("nt-P3.ppm","rb")
 
 print("Name : "+fileBinary.name)
 
@@ -279,29 +287,16 @@ print("Ready to compress Matrixes U and V")
 compressMatrixe(matrixesUDivided)
 compressMatrixe(matrixesVDivided)
 
-# fileTest = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/test","wb")
-# fileTest.write(str(matrixesYDivided))
-
-# fileTestt = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/testt","wb")
-# fileTestt.write(str(matrixesYDecompressed))
-
 print("Ready to Reformat matrixes")
 # Reformat Matrixes
 matrixesYDecompressed = decompressMatrixes(matrixesYDivided)
 matrixesUDecompressed = decompressMatrixes(matrixesUDivided)
 matrixesVDecompressed = decompressMatrixes(matrixesVDivided)
 
-
-filetest = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/testY","wb")
-filetest.write(str(matrixesYDecompressed))
-filetestt = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/testU","wb")
-filetestt.write(str(matrixesUDecompressed))
-filetesttt = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/testV","wb")
-filetesttt.write(str(matrixesVDecompressed))
-
 print("Ready to Create new Image")
 # Create new image
-newImage = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/newimage.ppm","wb")
+newImage = open("newimage.ppm","wb")
+#newImage = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/newimage.ppm","wb")
 writeNewImg(newImage,header,sizeW,sizeH,maxValueOfAByte)
 
 
@@ -322,3 +317,12 @@ writeNewImg(newImage,header,sizeW,sizeH,maxValueOfAByte)
 
 # fileTest = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/test","wb")
 # fileTest.write(str(matrixesYDivided))
+
+# filetest = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/testY","wb")
+# filetest.write(str(matrixesYDecompressed))
+
+# filetestt = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/testU","wb")
+# filetestt.write(str(matrixesUDecompressed))
+
+# filetesttt = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/testV","wb")
+# filetesttt.write(str(matrixesVDecompressed))
