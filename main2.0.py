@@ -412,17 +412,17 @@ DiscreteCosineTransform(matrixesYInverseDCT,matrixesUInverseDCT,matrixesVInverse
 # test = open('test',"wb")
 # test.write(str(quantizer))
 
-# print("Ready to Reformat matrixes")
-# # Reformat Matrixes
-# matrixesYDecompressed = decompressMatrixes(matrixesYDivided)
-# matrixesUDecompressed = decompressMatrixes(matrixesUDivided)
-# matrixesVDecompressed = decompressMatrixes(matrixesVDivided)
+print("Ready to Reformat matrixes")
+# Reformat Matrixes
+matrixesYDecompressed = decompressMatrixes(matrixesYInverseDCT)
+matrixesUDecompressed = decompressMatrixes(matrixesUInverseDCT)
+matrixesVDecompressed = decompressMatrixes(matrixesVInverseDCT)
 
-# print("Ready to Create new Image")
-# # Create new image
-# newImage = open("newimage.ppm","wb")
-# #newImage = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/newimage.ppm","wb")
-# writeNewImg(newImage,header,sizeW,sizeH,maxValueOfAByte)
+print("Ready to Create new Image")
+# Create new image
+newImage = open("newimage.ppm","wb")
+#newImage = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/newimage.ppm","wb")
+writeNewImg(newImage,header,sizeW,sizeH,maxValueOfAByte)
 
 
 
