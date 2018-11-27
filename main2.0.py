@@ -173,6 +173,21 @@ def DiscreteCosineTransform(matrixeY,matrixeU,matrixeV) :
                 matrixeV[matrix][lines][value] = matrixeV[matrix][lines][value] - 128         
     return
 
+def InverseDiscreteCosineTransform(matrixeY,matrixeU,matrixeV) :
+    for matrix in range(0,len(matrixeY)) :
+        for lines in range(0,len(matrixeY[matrix])) :
+            for value in range(0,len(matrixeY[matrix][lines])) :
+                matrixeY[matrix][lines][value] = matrixeY[matrix][lines][value] + 128
+    for matrix in range(0,len(matrixeU)) :
+        for lines in range(0,len(matrixeU[matrix])) :
+            for value in range(0,len(matrixeU[matrix][lines])) :
+                matrixeU[matrix][lines][value] = matrixeU[matrix][lines][value] + 128
+    for matrix in range(0,len(matrixeV)) :
+        for lines in range(0,len(matrixeV[matrix])) :
+            for value in range(0,len(matrixeV[matrix][lines])) :
+                matrixeV[matrix][lines][value] = matrixeV[matrix][lines][value] + 128         
+    return    
+
 def ForwardDCT(matrixesDivided) :
     matrix = []
     for cpt in range(0,len(matrixesDivided)) :
@@ -200,17 +215,58 @@ def ForwardDCT(matrixesDivided) :
         matrix.append(tabTmp)        
     return matrix
 
+def InverseDCT (matrixDCT) :
+    matrix = []
+    for cpt in range(0,len(matrixDCT)) :
+        tabTmp = [[0 for a in range(8)] for b in range(8)]
+        for x in range(0,8) :
+            for y in range(0,8) :
+                # Calcul of DCT coef
+                tmp = 0
+                for u in range(0,8) :
+                    for v in range(0,8) :
+                        if u == 0 :
+                            U = 1.0 / sqrt(2)
+                            V = 1.0 / sqrt(2)
+                        else :
+                            U = 1.0    
+                            V = 1.0
+                        coef = U*V
+                        # Use classe's fonction 
+                        tmp = tmp + coef * matrixDCT[cpt][u][v] * cos(((2*x+1)*u*pi)/16) * cos(((2*y+1)*v*pi)/16)
+                tmp = tmp * 0.25
+                # Add value in matrix UV
+                tabTmp[x][y] = tmp
+        # Add matrixes in main tab
+        matrix.append(tabTmp)        
+    return matrix
+
 def createQuantizer(integer) :
     tab = []
-    for i in range (0,((sizeH*sizeH)/8)/8) :
+    for i in range (0,((sizeH*sizeW)/8)/8) :
         tabTmp = [[integer for a in range(8)] for b in range(8)]
         tab.append(tabTmp)
     return tab
 
 def quantizedMatrix(matrix,quantizer) :
-    
-    
-    return    
+    tab = []
+    for i in range (0,len(matrix)) :
+        tabTmp = [[0 for a in range(8)] for b in range(8)]
+        for x in range (0, 8) :
+            for y in range (0, 8) :
+                tabTmp[x][y] = matrix[i][x][y] / quantizer[i][x][y]
+        tab.append(tabTmp)        
+    return tab
+
+def deQuantizedMatrix(quantizedMatrix,quantizer) :
+    tab = []
+    for i in range (0,len(quantizedMatrix)) :
+        tabTmp = [[0 for a in range(8)] for b in range(8)]
+        for x in range (0, 8) :
+            for y in range (0, 8) :
+                tabTmp[x][y] = quantizedMatrix[i][x][y] * quantizer[i][x][y]
+        tab.append(tabTmp)        
+    return tab
 
 #---------- Function Test ----------
 def writeImgB(imgB,header,sizeW,sizeH,maxValueOfAByte) :
@@ -334,12 +390,27 @@ matrixesDCTY = ForwardDCT(matrixesYDivided)
 matrixesDCTU = ForwardDCT(matrixesUDivided)
 matrixesDCTV = ForwardDCT(matrixesVDivided)
 
-print("Ready to work with quantizer")
+print("Ready to Quantized")
 quantizer = createQuantizer(2.0)
+matrixYQuantized = quantizedMatrix(matrixesDCTY,quantizer)
+matrixUQuantized = quantizedMatrix(matrixesDCTU,quantizer)
+matrixVQuantized = quantizedMatrix(matrixesDCTV,quantizer)
 
-test = open('test',"wb")
-test.write(str(quantizer))
+print("Ready to DeQuantized")
+matrixYDeQuantized = deQuantizedMatrix(matrixYQuantized,quantizer)
+matrixUDeQuantized = deQuantizedMatrix(matrixUQuantized,quantizer)
+matrixVDeQuantized = deQuantizedMatrix(matrixVQuantized,quantizer)
 
+print("Ready to DeQuantized Inverse DCT")
+matrixesYInverseDCT = InverseDCT(matrixYDeQuantized)
+matrixesUInverseDCT = InverseDCTmatrixUDeQuantized
+matrixesVInverseDCT = InverseDCT(matrixVDeQuantized)
+
+print("Ready to add 128 to all values")
+DiscreteCosineTransform(matrixesYInverseDCT,matrixesUInverseDCT,matrixesVInverseDCT)
+
+# test = open('test',"wb")
+# test.write(str(quantizer))
 
 # print("Ready to Reformat matrixes")
 # # Reformat Matrixes
