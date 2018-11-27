@@ -173,24 +173,44 @@ def DiscreteCosineTransform(matrixeY,matrixeU,matrixeV) :
                 matrixeV[matrix][lines][value] = matrixeV[matrix][lines][value] - 128         
     return
 
-def ForwardDCT(matrixes) :
-    for v in range(0,8) :
-        for u in range(0,8) :
-            if u == 0 :
-                U = V = 1 / sqrt(2)
-            else :
-                U = V = 1    
-            coef = (U*V)/4
-            tmp = 0
-            #Ajout dans matrix UV
-            for matrix in range(0,len(matrixes)) :
+def ForwardDCT(matrixesDivided) :
+    matrix = []
+    for cpt in range(0,len(matrixesDivided)) :
+        tabTmp = [[0 for a in range(8)] for b in range(8)]
+        for v in range(0,8) :
+            for u in range(0,8) :
+                # Calcul of DCT coef
+                if u == 0 :
+                    U = 1.0 / sqrt(2)
+                    V = 1.0 / sqrt(2)
+                else :
+                    U = 1.0    
+                    V = 1.0
+                coef = (U*V)/4
+                tmp = 0
                 for y in range(0,8) :
-                    for x in range(0,8) :    
-                        tmp = tmp + cos(((2*x+1)*u*pi)/16)*cos(((2*x+1)*v*pi)/16)
+                    for x in range(0,8) :
+                        # Use classe's fonction 
+                        # tmp = tmp + matrixesDivided[cpt][x][y]*cos(((2*x+1)*u*pi)/16)*cos(((2*y+1)*v*pi)/16)
+                        tmp = tmp + cos(((2*x+1)*u*pi)/16)*cos(((2*y+1)*v*pi)/16)
+                tmp = tmp * coef
+                # Add value in matrix UV
+                tabTmp[v][u] = tmp
+        # Add matrixes in main tab
+        matrix.append(tabTmp)        
+    return matrix
 
-            # coef * tmp
-                    
-    return  
+def createQuantizer(integer) :
+    tab = []
+    for i in range (0,((sizeH*sizeH)/8)/8) :
+        tabTmp = [[integer for a in range(8)] for b in range(8)]
+        tab.append(tabTmp)
+    return tab
+
+def quantizedMatrix(matrix,quantizer) :
+    
+    
+    return    
 
 #---------- Function Test ----------
 def writeImgB(imgB,header,sizeW,sizeH,maxValueOfAByte) :
@@ -306,11 +326,19 @@ print("Ready to compress Matrixes U and V")
 compressMatrixe(matrixesUDivided)
 compressMatrixe(matrixesVDivided)
 
-# print("Ready to substract 128 to all values")
+print("Ready to substract 128 to all values")
 DiscreteCosineTransform(matrixesYDivided,matrixesUDivided,matrixesVDivided)
 
-ForwardDCT(matrixesYDivided)
+print("Ready to create DCT")
+matrixesDCTY = ForwardDCT(matrixesYDivided)
+matrixesDCTU = ForwardDCT(matrixesUDivided)
+matrixesDCTV = ForwardDCT(matrixesVDivided)
 
+print("Ready to work with quantizer")
+quantizer = createQuantizer(2.0)
+
+test = open('test',"wb")
+test.write(str(quantizer))
 
 
 # print("Ready to Reformat matrixes")
