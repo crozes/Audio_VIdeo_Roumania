@@ -403,7 +403,7 @@ matrixVDeQuantized = deQuantizedMatrix(matrixVQuantized,quantizer)
 
 print("Ready to DeQuantized Inverse DCT")
 matrixesYInverseDCT = InverseDCT(matrixYDeQuantized)
-matrixesUInverseDCT = InverseDCTmatrixUDeQuantized
+matrixesUInverseDCT = InverseDCT(matrixUDeQuantized)
 matrixesVInverseDCT = InverseDCT(matrixVDeQuantized)
 
 print("Ready to add 128 to all values")
