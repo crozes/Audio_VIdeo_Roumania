@@ -177,6 +177,8 @@ def InverseDiscreteCosineTransform(matrixeY,matrixeU,matrixeV) :
     for matrix in range(0,len(matrixeY)) :
         for lines in range(0,len(matrixeY[matrix])) :
             for value in range(0,len(matrixeY[matrix][lines])) :
+                #if (matrixeY[matrix][lines][value] + 128) > 255
+                #   matrixeY[matrix][lines][value] = 255
                 matrixeY[matrix][lines][value] = matrixeY[matrix][lines][value] + 128
     for matrix in range(0,len(matrixeU)) :
         for lines in range(0,len(matrixeU[matrix])) :
@@ -197,17 +199,19 @@ def ForwardDCT(matrixesDivided) :
                 # Calcul of DCT coef
                 if u == 0 :
                     U = 1.0 / sqrt(2)
+                else :
+                    U = 1.0
+                if v == 0 :
                     V = 1.0 / sqrt(2)
                 else :
-                    U = 1.0    
                     V = 1.0
                 coef = (U*V)/4
                 tmp = 0
                 for y in range(0,8) :
                     for x in range(0,8) :
                         # Use classe's fonction 
-                        # tmp = tmp + matrixesDivided[cpt][x][y]*cos(((2*x+1)*u*pi)/16)*cos(((2*y+1)*v*pi)/16)
-                        tmp = tmp + cos(((2*x+1)*u*pi)/16)*cos(((2*y+1)*v*pi)/16)
+                        tmp = tmp + matrixesDivided[cpt][x][y]*cos(((2*x+1)*u*pi)/16)*cos(((2*y+1)*v*pi)/16)
+                        #tmp = tmp + cos(((2*x+1)*u*pi)/16)*cos(((2*y+1)*v*pi)/16)
                 tmp = tmp * coef
                 # Add value in matrix UV
                 tabTmp[v][u] = tmp
@@ -227,14 +231,16 @@ def InverseDCT (matrixDCT) :
                     for v in range(0,8) :
                         if u == 0 :
                             U = 1.0 / sqrt(2)
+                        else :
+                            U = 1.0
+                        if v == 0 :
                             V = 1.0 / sqrt(2)
                         else :
-                            U = 1.0    
-                            V = 1.0
+                            V = 1.0    
                         coef = U*V
                         # Use classe's fonction 
                         tmp = tmp + coef * matrixDCT[cpt][u][v] * cos(((2*x+1)*u*pi)/16) * cos(((2*y+1)*v*pi)/16)
-                tmp = tmp * 0.25
+                tmp = tmp / 4
                 # Add value in matrix UV
                 tabTmp[x][y] = tmp
         # Add matrixes in main tab
@@ -243,9 +249,9 @@ def InverseDCT (matrixDCT) :
 
 def createQuantizer(integer) :
     tab = []
+    matrix = [[6,4,4,6,10,16,20,24],[5,5,6,8,10,23,24,22],[6,5,6,10,16,23,28,22],[6,7,9,12,20,35,32,25],[7,9,15,22,27,44,41,31],[10,14,22,26,32,42,45,37],[20,26,31,35,41,48,48,40],[29,37,38,39,45,40,41,40]]
     for i in range (0,((sizeH*sizeW)/8)/8) :
-        tabTmp = [[integer for a in range(8)] for b in range(8)]
-        tab.append(tabTmp)
+        tab.append(matrix)
     return tab
 
 def quantizedMatrix(matrix,quantizer) :
@@ -401,7 +407,7 @@ matrixYDeQuantized = deQuantizedMatrix(matrixYQuantized,quantizer)
 matrixUDeQuantized = deQuantizedMatrix(matrixUQuantized,quantizer)
 matrixVDeQuantized = deQuantizedMatrix(matrixVQuantized,quantizer)
 
-print("Ready to DeQuantized Inverse DCT")
+print("Ready to Inverse DCT")
 matrixesYInverseDCT = InverseDCT(matrixYDeQuantized)
 matrixesUInverseDCT = InverseDCT(matrixUDeQuantized)
 matrixesVInverseDCT = InverseDCT(matrixVDeQuantized)
