@@ -210,7 +210,7 @@ def ForwardDCT(matrixesDivided) :
                 for y in range(0,8) :
                     for x in range(0,8) :
                         # Use classe's fonction 
-                        tmp = tmp + matrixesDivided[cpt][x][y]*cos(((2*x+1)*u*pi)/16)*cos(((2*y+1)*v*pi)/16)
+                        tmp = tmp + matrixesDivided[cpt][y][x]*cos(((2*x+1)*u*pi)/16)*cos(((2*y+1)*v*pi)/16)
                         #tmp = tmp + cos(((2*x+1)*u*pi)/16)*cos(((2*y+1)*v*pi)/16)
                 tmp = tmp * coef
                 # Add value in matrix UV
@@ -411,9 +411,14 @@ print("Ready to Inverse DCT")
 matrixesYInverseDCT = InverseDCT(matrixYDeQuantized)
 matrixesUInverseDCT = InverseDCT(matrixUDeQuantized)
 matrixesVInverseDCT = InverseDCT(matrixVDeQuantized)
+# matrixesYInverseDCT = InverseDCT(matrixesDCTY)
+# matrixesUInverseDCT = InverseDCT(matrixesDCTU)
+# matrixesVInverseDCT = InverseDCT(matrixesDCTV)
 
 print("Ready to add 128 to all values")
-DiscreteCosineTransform(matrixesYInverseDCT,matrixesUInverseDCT,matrixesVInverseDCT)
+# InverseDiscreteCosineTransform(matrixesYDivided,matrixesUDivided,matrixesVDivided)
+InverseDiscreteCosineTransform(matrixesYInverseDCT,matrixesUInverseDCT,matrixesVInverseDCT)
+
 
 # test = open('test',"wb")
 # test.write(str(quantizer))
