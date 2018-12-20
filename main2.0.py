@@ -274,6 +274,151 @@ def deQuantizedMatrix(quantizedMatrix,quantizer) :
         tab.append(tabTmp)        
     return tab
 
+def do_zigzag(quantizedMatrix) :
+    tabDecomposed = []
+    for i in range(0,sizeH*sizeW/8/8):
+        tab = []
+        tab.append(quantizedMatrix[i][0][0])
+        tab.append(quantizedMatrix[i][0][1])
+        tab.append(quantizedMatrix[i][1][0])
+        tab.append(quantizedMatrix[i][2][0])
+        tab.append(quantizedMatrix[i][1][1])
+        tab.append(quantizedMatrix[i][0][2])
+        tab.append(quantizedMatrix[i][0][3])
+        tab.append(quantizedMatrix[i][1][2])
+        tab.append(quantizedMatrix[i][2][1])
+        tab.append(quantizedMatrix[i][3][0])
+        tab.append(quantizedMatrix[i][4][0])
+        tab.append(quantizedMatrix[i][3][1])
+        tab.append(quantizedMatrix[i][2][2])
+        tab.append(quantizedMatrix[i][1][3])
+        tab.append(quantizedMatrix[i][0][4])
+        tab.append(quantizedMatrix[i][0][5])
+        tab.append(quantizedMatrix[i][1][4])
+        tab.append(quantizedMatrix[i][2][3])
+        tab.append(quantizedMatrix[i][3][2])
+        tab.append(quantizedMatrix[i][4][1])
+        tab.append(quantizedMatrix[i][5][0])
+        tab.append(quantizedMatrix[i][6][0])
+        tab.append(quantizedMatrix[i][5][1])
+        tab.append(quantizedMatrix[i][4][2])
+        tab.append(quantizedMatrix[i][3][3])
+        tab.append(quantizedMatrix[i][2][4])
+        tab.append(quantizedMatrix[i][1][5])
+        tab.append(quantizedMatrix[i][0][6])
+        tab.append(quantizedMatrix[i][0][7])
+        tab.append(quantizedMatrix[i][1][6])
+        tab.append(quantizedMatrix[i][2][5])
+        tab.append(quantizedMatrix[i][3][4])
+        tab.append(quantizedMatrix[i][4][3])
+        tab.append(quantizedMatrix[i][5][2])
+        tab.append(quantizedMatrix[i][6][1])
+        tab.append(quantizedMatrix[i][7][0])
+        tab.append(quantizedMatrix[i][7][1])
+        tab.append(quantizedMatrix[i][6][2])
+        tab.append(quantizedMatrix[i][5][3])
+        tab.append(quantizedMatrix[i][4][4])
+        tab.append(quantizedMatrix[i][3][5])
+        tab.append(quantizedMatrix[i][2][6])
+        tab.append(quantizedMatrix[i][1][7])
+        tab.append(quantizedMatrix[i][2][7])
+        tab.append(quantizedMatrix[i][3][6])
+        tab.append(quantizedMatrix[i][4][5])
+        tab.append(quantizedMatrix[i][5][4])
+        tab.append(quantizedMatrix[i][6][3])
+        tab.append(quantizedMatrix[i][7][2])
+        tab.append(quantizedMatrix[i][7][3])
+        tab.append(quantizedMatrix[i][6][4])
+        tab.append(quantizedMatrix[i][5][5])
+        tab.append(quantizedMatrix[i][4][6])
+        tab.append(quantizedMatrix[i][3][7])
+        tab.append(quantizedMatrix[i][4][7])
+        tab.append(quantizedMatrix[i][5][6])
+        tab.append(quantizedMatrix[i][6][5])
+        tab.append(quantizedMatrix[i][7][4])
+        tab.append(quantizedMatrix[i][7][5])
+        tab.append(quantizedMatrix[i][6][6])
+        tab.append(quantizedMatrix[i][5][7])
+        tab.append(quantizedMatrix[i][6][7])
+        tab.append(quantizedMatrix[i][7][6])
+        tab.append(quantizedMatrix[i][7][7])
+        tabDecomposed.append(tab)
+    return tabDecomposed
+
+def getSize(value) :
+    if(value > -1 and value < 1) :
+        return 1
+    elif((value >= -3 and value <= -2) or (value >= 2 and value <= 3)) :
+        return 2
+    elif((value >= -7 and value <= -4) or (value >= 4 and value <= 7)) :
+        return 3
+    elif((value >= -15 and value <= -8) or (value >= 8 and value <= 15)) :
+        return 4
+    elif((value >= -31 and value <= -16) or (value >= 16 and value <= 31)) :
+        return 5
+    elif((value >= -63 and value <= -32) or (value >= 32 and value <= 63)) :
+        return 6 
+    elif((value >= -127 and value <= -64) or (value >= 64 and value <= 127)) :
+        return 7
+    elif((value >= -255 and value <= -128) or (value >= 128 and value <= 255)) :
+        return 8
+    elif((value >= -511 and value <= -256) or (value >= 256 and value <= 511)) :
+        return 9
+    elif((value >= -1023 and value <= -512) or (value >= 512 and value <= 1023)) :
+        return 10  
+
+def getBytesArray(tabsY,tabsU, tabsV) :
+    byteArrayToReturn = bytes()
+    for x in range(0,sizeH*sizeW/8/8) :
+        cpt = 0
+        values = bytes()
+        for i in range(0,64) :
+            if (i==0) :
+                values += bytes(getSize(tabsY[x][i]))
+                values += bytes(tabsY[x][i])
+            if(tabsY[x][i] == 0) :
+                cpt += 1
+            else :
+                values += bytes(cpt)
+                values += bytes(getSize(tabsY[x][i]))
+                values += bytes(tabsY[x][i])
+                cpt = 0
+        values += bytes(0)
+        values += bytes(0)        
+        byteArrayToReturn = byteArrayToReturn + values
+        values = bytes()
+        for i in range(0,64) :
+            if (i==0) :
+                values += bytes(getSize(tabsU[x][i]))
+                values += bytes(tabsU[x][i])
+            if(tabsU[x][i] == 0) :
+                cpt += 1
+            else :
+                values += bytes(cpt)
+                values += bytes(getSize(tabsU[x][i]))
+                values += bytes(tabsU[x][i])
+                cpt = 0
+        values += bytes(0)
+        values += bytes(0)        
+        byteArrayToReturn = byteArrayToReturn + values
+        values = bytes()
+        for i in range(0,64) :
+            if (i==0) :
+                values += bytes(getSize(tabsV[x][i]))
+                values += bytes(tabsV[x][i])
+            if(tabsV[x][i] == 0) :
+                cpt += 1
+            else :
+                values += bytes(cpt)
+                values += bytes(getSize(tabsV[x][i]))
+                values += bytes(tabsV[x][i])
+                cpt = 0
+        values += bytes(0)
+        values += bytes(0)        
+        byteArrayToReturn = byteArrayToReturn + values        
+    return byteArrayToReturn    
+
+
 #---------- Function Test ----------
 def writeImgB(imgB,header,sizeW,sizeH,maxValueOfAByte) :
     imgB.write(header)
@@ -402,38 +547,49 @@ matrixYQuantized = quantizedMatrix(matrixesDCTY,quantizer)
 matrixUQuantized = quantizedMatrix(matrixesDCTU,quantizer)
 matrixVQuantized = quantizedMatrix(matrixesDCTV,quantizer)
 
-print("Ready to DeQuantized")
-matrixYDeQuantized = deQuantizedMatrix(matrixYQuantized,quantizer)
-matrixUDeQuantized = deQuantizedMatrix(matrixUQuantized,quantizer)
-matrixVDeQuantized = deQuantizedMatrix(matrixVQuantized,quantizer)
+print("Ready to read in zigzag")
+zigZagY = do_zigzag(matrixYQuantized)
+zigZagU = do_zigzag(matrixUQuantized)
+zigZagV = do_zigzag(matrixVQuantized)
 
-print("Ready to Inverse DCT")
-matrixesYInverseDCT = InverseDCT(matrixYDeQuantized)
-matrixesUInverseDCT = InverseDCT(matrixUDeQuantized)
-matrixesVInverseDCT = InverseDCT(matrixVDeQuantized)
-# matrixesYInverseDCT = InverseDCT(matrixesDCTY)
-# matrixesUInverseDCT = InverseDCT(matrixesDCTU)
-# matrixesVInverseDCT = InverseDCT(matrixesDCTV)
+print("Ready to get bytes")
+coucou = getBytesArray(zigZagY,zigZagU,zigZagV)
 
-print("Ready to add 128 to all values")
-# InverseDiscreteCosineTransform(matrixesYDivided,matrixesUDivided,matrixesVDivided)
-InverseDiscreteCosineTransform(matrixesYInverseDCT,matrixesUInverseDCT,matrixesVInverseDCT)
+f = open("coucou","w")
+f.write(coucou)
+
+# print("Ready to DeQuantized")
+# matrixYDeQuantized = deQuantizedMatrix(matrixYQuantized,quantizer)
+# matrixUDeQuantized = deQuantizedMatrix(matrixUQuantized,quantizer)
+# matrixVDeQuantized = deQuantizedMatrix(matrixVQuantized,quantizer)
+
+# print("Ready to Inverse DCT")
+# matrixesYInverseDCT = InverseDCT(matrixYDeQuantized)
+# matrixesUInverseDCT = InverseDCT(matrixUDeQuantized)
+# matrixesVInverseDCT = InverseDCT(matrixVDeQuantized)
+# # matrixesYInverseDCT = InverseDCT(matrixesDCTY)
+# # matrixesUInverseDCT = InverseDCT(matrixesDCTU)
+# # matrixesVInverseDCT = InverseDCT(matrixesDCTV)
+
+# print("Ready to add 128 to all values")
+# # InverseDiscreteCosineTransform(matrixesYDivided,matrixesUDivided,matrixesVDivided)
+# InverseDiscreteCosineTransform(matrixesYInverseDCT,matrixesUInverseDCT,matrixesVInverseDCT)
 
 
-# test = open('test',"wb")
-# test.write(str(quantizer))
+# # test = open('test',"wb")
+# # test.write(str(quantizer))
 
-print("Ready to Reformat matrixes")
-# Reformat Matrixes
-matrixesYDecompressed = decompressMatrixes(matrixesYInverseDCT)
-matrixesUDecompressed = decompressMatrixes(matrixesUInverseDCT)
-matrixesVDecompressed = decompressMatrixes(matrixesVInverseDCT)
+# print("Ready to Reformat matrixes")
+# # Reformat Matrixes
+# matrixesYDecompressed = decompressMatrixes(matrixesYInverseDCT)
+# matrixesUDecompressed = decompressMatrixes(matrixesUInverseDCT)
+# matrixesVDecompressed = decompressMatrixes(matrixesVInverseDCT)
 
-print("Ready to Create new Image")
-# Create new image
-newImage = open("newimage.ppm","wb")
-#newImage = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/newimage.ppm","wb")
-writeNewImg(newImage,header,sizeW,sizeH,maxValueOfAByte)
+# print("Ready to Create new Image")
+# # Create new image
+# newImage = open("newimage.ppm","wb")
+# #newImage = open("/Users/cyrilcrozes/Documents/Documents/Document_IMERIR/Roumanie/Audio_Video/newimage.ppm","wb")
+# writeNewImg(newImage,header,sizeW,sizeH,maxValueOfAByte)
 
 
 
